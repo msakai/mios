@@ -639,7 +639,7 @@ solve s@Solver{..} assumps = do
             cancelUntil s 0
             return $ status == lTrue
           while _ nOfConflicts nOfLearnts = do
-            status <- search s (ceiling nOfConflicts) (ceiling nOfLearnts)
+            status <- search s (floor nOfConflicts) (floor nOfLearnts)
             while status (1.5 * nOfConflicts) (1.1 * nOfLearnts)
         while lBottom 100 (nc / 3.0)
 

@@ -30,7 +30,7 @@ import SAT.Solver.Mios.Implementation.IntSingleton
 
 -- | version name
 versionId :: String
-versionId = "mios version 1.0.0, #hofo" -- #heapOfFoolishOptimizations > #rigorousEmulatonOfMinisat-1.14
+versionId = "mios WIP#luby on version 1.0.0"
 
 -- | solver configuration
 data MiosConfiguration = MiosConfiguration
@@ -38,9 +38,11 @@ data MiosConfiguration = MiosConfiguration
                            variableDecayRate  :: Double
                          , clauseDecayRate    :: Double
                          , randomDecisionRate :: Int -- used in Solver.select
+                         , lubyScale          :: Int -- scaling factor
                          }
 
 -- | dafault configuration
 -- Minisat-1.14 uses the identical values: (0.95, 0.999, 0.2 = 20 / 1000)
+-- some small value is good for 4th arg, known as 'ultra rapid restart'
 defaultConfiguration :: MiosConfiguration
-defaultConfiguration = MiosConfiguration 0.95 0.999 20
+defaultConfiguration = MiosConfiguration 0.95 0.999 20 10

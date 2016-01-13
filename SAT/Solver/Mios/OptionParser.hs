@@ -24,6 +24,7 @@ data MiosConfigurationOption = MiosConfigurationOption
                      , _confVariableDecayRate :: Double
                      , _confClauseDecayRate :: Double
                      , _confRandomDecisionRate :: Int
+                     , _confLubyParameter :: Int
                      , _confVerbose :: Bool
                      , _confNoAnswer :: Bool
                      , _displayHelp :: Bool
@@ -38,6 +39,7 @@ miosDefaultOption = MiosConfigurationOption
   , _confVariableDecayRate = variableDecayRate defaultConfiguration
   , _confClauseDecayRate = clauseDecayRate defaultConfiguration
   , _confRandomDecisionRate = randomDecisionRate defaultConfiguration
+  , _confLubyParameter = lubyScale defaultConfiguration
   , _confVerbose = False
   , _confNoAnswer = False
   , _displayHelp = False
@@ -57,6 +59,9 @@ miosOptions =
   , Option ['r'] ["random-decision-rate"]
     (ReqArg (\v c -> c { _confRandomDecisionRate = read v }) (show (_confRandomDecisionRate miosDefaultOption)))
     "[configuration] rate of selecting a decsion variable randomly (0 - 1000)"
+  , Option ['l'] ["luby-parameter"]
+    (ReqArg (\v c -> c { _confLubyParameter = read v }) (show (_confLubyParameter miosDefaultOption)))
+    "[configuration] restart scaling factor, multiplying Luby series (> 0)"
   , Option [] ["stdin"]
     (NoArg (\c -> c { _targetFile = Nothing }))
     "[option] read a CNF from STDIN instead of a file"
@@ -100,4 +105,5 @@ toMiosConf opts = MiosConfiguration
                    variableDecayRate = _confVariableDecayRate opts
                  , clauseDecayRate = _confClauseDecayRate opts
                  , randomDecisionRate = _confRandomDecisionRate opts
+                 , lubyScale = _confLubyParameter opts
                  }

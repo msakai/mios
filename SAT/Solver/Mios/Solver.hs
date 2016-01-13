@@ -70,7 +70,8 @@ data Solver = Solver
               , currentWatch :: WatchLink       -- ^ used in 'propagate` repeatedely
               , nVars      :: Int 		-- ^ number of variables
                 -- * configuration
-              , config    :: MiosConfiguration  -- ^ search paramerters
+              , config     :: MiosConfiguration  -- ^ search paramerters
+              , lubySequence :: IORef [Int]      -- ^ tail of Luby sequence
               }
 
 -- | returns the number of current assigments
@@ -156,6 +157,7 @@ newSolver conf = Solver
             <*> newWatchLink     -- currentWatch
             <*> return 0         -- nVars
             <*> return conf      -- config
+            <*> newIORef makeLubySequence
 
 -- | public interface of 'Solver' (p.2)
 --
@@ -634,13 +636,18 @@ solve s@Solver{..} assumps = do
         writeIORef rootLevel =<< getInt decisionLevel
         -- SOLVE:
         let
+          while :: LBool -> Int -> Double -> IO Bool
           while status@((lBottom ==) -> False) _ _ = do
             cancelUntil s 0
             return $ status == lTrue
           while _ nOfConflicts nOfLearnts = do
-            status <- search s (fromEnum . fromRational $ nOfConflicts) (fromEnum . fromRational $ nOfLearnts)
-            while status (1.5 * nOfConflicts) (1.1 * nOfLearnts)
-        while lBottom 100 (nc / 3)
+            status <- search s nOfConflicts (ceiling nOfLearnts)
+            noc <- (* lubyScale config) . head <$> readIORef lubySequence
+            modifyIORef' lubySequence tail
+            while status noc (1.1 * nOfLearnts)
+        noc <- (* lubyScale config) . head <$> readIORef lubySequence
+        modifyIORef' lubySequence tail
+        while lBottom noc (nc / 3)
 
 ---- constraint interface
 
@@ -1058,6 +1065,24 @@ getHeapRoot s@(order -> VarHeap to at) = do
   n <- getNthInt 0 to
   when (1 < n) $ percolateDown s 1
   return r
+
+-------------------------------------------------------------------------------- Luby sequence
+
+makeLubySequence :: [Int]
+makeLubySequence = map f [1..]
+  where
+    f i = if e then 2 ^ (k - 1) else f (i - 2 ^ (k - 1) + 1)
+      where (k, e) = g i
+    g :: Int -> (Int, Bool)
+    g n  = let (x, y) = h (1 + n) in if y then (x, y) else (x + 1, y)
+    h :: Int -> (Int, Bool)
+    h 0 = (0, True)
+    h 1 = (0, True)
+    h n = (p' + 1, x)
+      where
+        x = e' && d == 0
+        (n', d) = divMod n 2
+        (p', e') = h n'
 
 -------------------------------------------------------------------------------- debug code
 

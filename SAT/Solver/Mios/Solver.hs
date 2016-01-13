@@ -634,13 +634,14 @@ solve s@Solver{..} assumps = do
         writeIORef rootLevel =<< getInt decisionLevel
         -- SOLVE:
         let
+          while :: LBool -> Double -> Double -> IO Bool
           while status@((lBottom ==) -> False) _ _ = do
             cancelUntil s 0
             return $ status == lTrue
           while _ nOfConflicts nOfLearnts = do
-            status <- search s (fromEnum . fromRational $ nOfConflicts) (fromEnum . fromRational $ nOfLearnts)
+            status <- search s (ceiling nOfConflicts) (ceiling nOfLearnts)
             while status (1.5 * nOfConflicts) (1.1 * nOfLearnts)
-        while lBottom 100 (nc / 3)
+        while lBottom 100 (nc / 3.0)
 
 ---- constraint interface
 

@@ -2,7 +2,7 @@
 -- see http://haskell.org/cabal/users-guide/
 
 name:           mios
-version:        1.0.0
+version:        1.0.1
 synopsis:       Minisat-based Implementation and Optimization Study on SAT solver
 description:
 

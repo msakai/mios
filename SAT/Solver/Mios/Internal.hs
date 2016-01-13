@@ -30,7 +30,7 @@ import SAT.Solver.Mios.Implementation.IntSingleton
 
 -- | version name
 versionId :: String
-versionId = "mios version 1.0.0, #hofo" -- #heapOfFoolishOptimizations > #rigorousEmulatonOfMinisat-1.14
+versionId = "mios version 1.0.0+, #hofo" -- #heapOfFoolishOptimizations > #rigorousEmulatonOfMinisat-1.14
 
 -- | solver configuration
 data MiosConfiguration = MiosConfiguration
